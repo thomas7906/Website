@@ -331,7 +331,7 @@ function showPlayerSelectionButtons() {
 
     // Position button centered above chip stack
     selectBtn.style.left = `${rect.left + rect.width / 2}px`;
-    selectBtn.style.top = `${rect.top - 30}px`; // 30px above chip stack
+    selectBtn.style.top = `${rect.top}px`; // 30px above chip stack
     selectBtn.style.transform = "translateX(-50%)";
 
     // Toggle selection
