@@ -67,7 +67,7 @@ if (idx === 0) {
   area.style.left = "50%";
   area.style.transform = "translateX(-50%)";
 } else if (idx === 1) {
-  area.style.top = "20px";
+  area.style.top = "30px";
   area.style.left = "50%";
   // ✅ Only rotate if Tabletop Touch
   area.style.transform = gameMode === "Desktop"
@@ -90,7 +90,7 @@ if (idx === 0) {
   area.style.left = "75%";
   area.style.transform = "translateX(-50%)";
 } else if (idx === 5) {
-  area.style.top = "20px";
+  area.style.top = "30px";
   area.style.left = "25%";
   area.style.transform = gameMode === "Desktop"
     ? "translateX(-50%)"
@@ -100,7 +100,7 @@ if (idx === 0) {
   area.style.left = "25%";
   area.style.transform = "translateX(-50%)";
 } else if (idx === 7) {
-  area.style.top = "20px";
+  area.style.top = "30px";
   area.style.left = "75%";
   area.style.transform = gameMode === "Desktop"
     ? "translateX(-50%)"
@@ -142,6 +142,23 @@ if (idx === 0) {
         stackDiv.appendChild(dragImg);
 
         chipDiv.appendChild(stackDiv);
+        // Display chip value on top of stack
+        const valueDiv = document.createElement("div");
+        valueDiv.className = "chip-value";
+        valueDiv.textContent = denom;
+        valueDiv.style.position = "absolute";
+        valueDiv.style.top = "-20px";          // offset above stack
+        valueDiv.style.left = "50%";           // center horizontally
+        valueDiv.style.transform = "translateX(-50%)";
+        valueDiv.style.pointerEvents = "none"; // so it doesn't block drag
+        valueDiv.style.color = "white";        // visible on top of chips
+        valueDiv.style.fontWeight = "bold";
+        valueDiv.style.fontSize = "14px";
+        valueDiv.style.zIndex = "1000";        // above all chips
+
+        stackDiv.appendChild(valueDiv);
+
+
       }
     });
 
@@ -280,12 +297,14 @@ function enableDrag() {
         if (originalNextSibling) originalParent.insertBefore(chip, originalNextSibling);
         else originalParent.appendChild(chip);
 
-        chip.style.position = "relative";
-        chip.style.left = "";
-        chip.style.top = "";
-        chip.style.transform = "";
+        // ✅ Reset styles so it stacks properly
+        chip.style.position = "absolute";
+        chip.style.left = "0px";
+        chip.style.top = "0px";
+        chip.style.transform = "translate(0, 0)";
         chip.style.zIndex = "";
       }
+
     };
 
     chip.addEventListener("mousedown", startDrag);
