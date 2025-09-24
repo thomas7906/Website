@@ -1,6 +1,8 @@
 // Initialize players
 let denominations = [1000,500,100,50,25,10,5,1];
 let potAmount = 0;
+let gameMode = localStorage.getItem("gameMode") || "Desktop";
+
 
 // Get starting chips from poker.html input if first game
 let startingChips = 1000; // default fallback
@@ -61,46 +63,50 @@ function renderPlayers() {
 
 // Positioning players
 if (idx === 0) {
-  // Player 1: bottom center
   area.style.bottom = "20px";
   area.style.left = "50%";
   area.style.transform = "translateX(-50%)";
 } else if (idx === 1) {
-  // Player 2: top center, upside down
   area.style.top = "20px";
   area.style.left = "50%";
-  area.style.transform = "translateX(-50%) rotate(180deg)";
+  // ✅ Only rotate if Tabletop Touch
+  area.style.transform = gameMode === "Desktop"
+    ? "translateX(-50%)"
+    : "translateX(-50%) rotate(180deg)";
 } else if (idx === 2) {
-  // Player 3: left center, rotated 90deg clockwise
   area.style.left = "20px";
   area.style.top = "50%";
-  area.style.transform = "translateY(-50%) rotate(90deg)";
+  area.style.transform = gameMode === "Desktop"
+    ? "translateY(-50%)"
+    : "translateY(-50%) rotate(90deg)";
 } else if (idx === 3) {
-  // Player 4: right center, rotated 90deg counterclockwise
   area.style.right = "20px";
   area.style.top = "50%";
-  area.style.transform = "translateY(-50%) rotate(-90deg)";
+  area.style.transform = gameMode === "Desktop"
+    ? "translateY(-50%)"
+    : "translateY(-50%) rotate(-90deg)";
 } else if (idx === 4) {
-  // Player 5: bottom row, centered between center and right
   area.style.bottom = "20px";
-  area.style.left = "75%"; // halfway between center (50%) and right (100%)
+  area.style.left = "75%";
   area.style.transform = "translateX(-50%)";
 } else if (idx === 5) {
-  // Player 6: top row, centered between center and left
   area.style.top = "20px";
-  area.style.left = "25%"; // halfway between left (0%) and center (50%)
-  area.style.transform = "translateX(-50%) rotate(180deg)"; // keep upside down
+  area.style.left = "25%";
+  area.style.transform = gameMode === "Desktop"
+    ? "translateX(-50%)"
+    : "translateX(-50%) rotate(180deg)";
 } else if (idx === 6) {
-  // Player 7: bottom row, centered between center and left
   area.style.bottom = "20px";
-  area.style.left = "25%"; // halfway between left (0%) and center (50%)
-  area.style.transform = "translateX(-50%)"; // bottom row, so no rotation
+  area.style.left = "25%";
+  area.style.transform = "translateX(-50%)";
 } else if (idx === 7) {
-  // Player 8: top row, centered between center and right
   area.style.top = "20px";
-  area.style.left = "75%"; // halfway between center (50%) and right (100%)
-  area.style.transform = "translateX(-50%) rotate(180deg)"; // top row upside down
+  area.style.left = "75%";
+  area.style.transform = gameMode === "Desktop"
+    ? "translateX(-50%)"
+    : "translateX(-50%) rotate(180deg)";
 }
+
 
 
 
@@ -293,7 +299,8 @@ function enableDrag() {
 }
 
 function updatePotDisplay() {
-  document.querySelector(".pot-up").textContent = `Pot: ${potAmount}`;
+  let gameMode = localStorage.getItem("gameMode") || "Desktop";
+  if (gameMode !== "Desktop") { document.querySelector(".pot-up").textContent = `Pot: ${potAmount}`; }
   document.querySelector(".pot-down").textContent = `Pot: ${potAmount}`;
 }
 
@@ -427,6 +434,12 @@ function checkConfirmButtonVisibility() {
 
 // Initialize
 renderPlayers();
+
+if(gameMode == "Desktop") {
+  document.body.classList.add("desktop"); 
+} else {
+  document.body.classList.add("tabletop-touch");
+}
 
 // After renderPlayers() call and winnerBtn declaration
 const winnerBtn = document.getElementById("winnerBtn");

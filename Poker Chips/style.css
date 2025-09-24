@@ -78,13 +78,31 @@ html, body {
   z-index: 100000; /* stays above draggable chips */
 }
 
+/* existing transforms */
 .pot-up {
-  transform: translateY(-75%) rotate(180deg);
+  transform: translateY(-450%) rotate(180deg);
 }
 
 .pot-down {
-  transform: translateY(75%);
+  transform: translateY(450%);
 }
+
+/* Desktop mode → hide pot-up, keep pot-down */
+body.desktop .pot-up {
+  display: none;
+}
+body.desktop .pot-down {
+  display: block;
+}
+
+/* Tabletop Touch mode → show both */
+body.tabletop-touch .pot-up,
+body.tabletop-touch .pot-down {
+  display: block;
+}
+
+
+
 
 /* --- Winner Button --- */
 #winnerBtn {

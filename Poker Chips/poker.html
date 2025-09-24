@@ -136,6 +136,9 @@
       const playersData = validPlayers.map(name => ({ name, chips }));
       localStorage.setItem("startingChips", chips);
       localStorage.setItem("players", JSON.stringify(playersData));
+
+      // ✅ Save mode here
+      localStorage.setItem("gameMode", gameMode);
   
       startTabletopMode();
     }
