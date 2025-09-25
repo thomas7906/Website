@@ -1,0 +1,137 @@
+/* --- General Styles --- */
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  background-color: gray;
+  position: relative;
+}
+
+/* --- Player Areas --- */
+.player-area {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+}
+
+/* --- Chip Stacks --- */
+.chips {
+  position: relative; /* reference for absolutely positioned children */
+  display: flex;
+  gap: 5px;
+}
+
+.chips img.static-chip {
+  position: relative; /* stays in normal flow */
+  opacity: 0.5;       /* static chip slightly transparent */
+  width: 40px;
+  height: 40px;
+}
+
+.chips img.draggable {
+  position: absolute; /* overlays static chip */
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  cursor: grab;
+  z-index: 10; /* above static chip */
+}
+
+/* --- Player Info Row --- */
+.player-info {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fold-btn:disabled {
+  background-color: grey;
+  color: white;
+}
+
+/* --- Pot --- */
+#pot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid black;
+  border-radius: 50%;
+  width: 200px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+}
+
+.pot-text {
+  font-weight: bold;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  z-index: 100000; /* stays above draggable chips */
+}
+
+/* existing transforms */
+.pot-up {
+  transform: translateY(-450%) rotate(180deg);
+}
+
+.pot-down {
+  transform: translateY(450%);
+}
+
+/* Desktop mode → hide pot-up, keep pot-down */
+body.desktop .pot-up {
+  display: none;
+}
+body.desktop .pot-down {
+  display: block;
+}
+
+/* Tabletop Touch mode → show both */
+body.tabletop-touch .pot-up,
+body.tabletop-touch .pot-down {
+  display: block;
+}
+
+
+
+
+/* --- Winner Button --- */
+#winnerBtn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 15px;
+  background-color: green;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 1000; /* make sure it stays above other elements */
+}
+
+/* --- Rebuy Button --- */
+#rebuyBtn {
+  position: absolute;
+  bottom: 75px;
+  right: 22px;
+  padding: 10px 15px;
+  background-color: rgb(0, 0, 255);
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 1000; /* make sure it stays above other elements */
+}
+
+
+/* --- Draggable Cursor --- */
+.draggable {
+  cursor: grab;
+}
