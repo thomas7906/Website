@@ -324,7 +324,7 @@ function updatePotDisplay() {
 }
 
 
-function showPlayerSelectionButtons() {
+function showPlayerWinnerSelectionButtons() {
   // Remove existing selection buttons first
   document.querySelectorAll(".player-select-btn").forEach(btn => btn.remove());
 
@@ -366,6 +366,54 @@ function showPlayerSelectionButtons() {
         prizePool.splice(prizeIdx, 1);
         selectBtn.style.backgroundColor = "";
         checkConfirmButtonVisibility();
+      }
+    });
+
+    document.body.appendChild(selectBtn);
+  });
+}
+
+function showPlayerRebuySelectionButtons() {
+  // Remove existing selection buttons first
+  document.querySelectorAll(".player-select-btn").forEach(btn => btn.remove());
+
+  players.forEach((player, idx) => {
+
+    const area = document.querySelectorAll(".player-area")[idx];
+    if (!area) return;
+
+    const chipDiv = area.querySelector(".chips");
+    if (!chipDiv) return;
+
+    const rect = chipDiv.getBoundingClientRect(); // get chip stack position
+
+    const selectBtn = document.createElement("button");
+    selectBtn.textContent = player.name;
+    selectBtn.className = "player-select-btn";
+    selectBtn.style.position = "fixed";
+    selectBtn.style.padding = "5px 10px";
+    selectBtn.style.fontSize = "12px";
+    selectBtn.style.cursor = "pointer";
+    selectBtn.style.zIndex = 3001; // above overlay
+
+    // Position button centered above chip stack
+    selectBtn.style.left = `${rect.left + rect.width / 2}px`;
+    selectBtn.style.top = `${rect.top}px`; // 30px above chip stack
+    selectBtn.style.transform = "translateX(-50%)";
+
+    // Toggle selection
+    selectBtn.addEventListener("click", () => {
+      const rebuyIdx = rebuyPool.indexOf(idx);
+      if (rebuyIdx === -1) {
+        // Add to Rebuy pool
+        rebuyPool.push(idx);
+        selectBtn.style.backgroundColor = "green";
+        ensureRebuyConfirmButton();
+      } else {
+        // Remove from Rebuy pool
+        rebuyPool.splice(rebuyIdx, 1);
+        selectBtn.style.backgroundColor = "";
+        checkRebuyConfirmButtonVisibility();
       }
     });
 
@@ -439,6 +487,49 @@ function ensureConfirmButton() {
       document.body.appendChild(confirmBtn);
     }
   }
+
+function ensureRebuyConfirmButton() {
+    let rebuyConfirmBtn = document.getElementById("rebuyConfirmBtn");
+    const rebuyAmount = parseInt(localStorage.getItem("Rebuy")) || 0;
+    
+    if (!rebuyConfirmBtn) {
+      rebuyConfirmBtn = document.createElement("button");
+      rebuyConfirmBtn.id = "rebuyConfirmBtn";
+      rebuyConfirmBtn.textContent = "Confirm";
+      rebuyConfirmBtn.style.position = "fixed";
+      rebuyConfirmBtn.style.bottom = "75px";
+      rebuyConfirmBtn.style.right = "20px";
+      rebuyConfirmBtn.style.padding = "10px 15px";
+      rebuyConfirmBtn.style.backgroundColor = "green";
+      rebuyConfirmBtn.style.color = "white";
+      rebuyConfirmBtn.style.border = "none";
+      rebuyConfirmBtn.style.cursor = "pointer";
+      rebuyConfirmBtn.style.zIndex = 3001; // above cancel button
+  
+      // Attach click event here
+      rebuyConfirmBtn.addEventListener("click", () => {
+        if (rebuyPool.length === 0) return;
+  
+        rebuyPool.forEach(idx => {
+          players[idx].chips += rebuyAmount;
+        });
+  
+        // 5. Remove overlay, cancel button, confirm button, and player selection buttons
+        document.getElementById("rebuyOverlay")?.remove();
+        document.getElementById("rebuyCancelBtn")?.remove();
+        rebuyConfirmBtn.remove();
+        document.querySelectorAll(".player-select-btn").forEach(btn => btn.remove());
+  
+        // 6. Render new chips for all players based on updated balances
+        renderPlayers();
+  
+        // 7. Clear prize pool
+        rebuyPool = [];
+      });
+  
+      document.body.appendChild(rebuyConfirmBtn);
+    }
+  }
   
 
 // Hide confirm button if prize pool is empty
@@ -448,8 +539,49 @@ function checkConfirmButtonVisibility() {
     confirmBtn.remove();
   }
 }
+
+function checkRebuyConfirmButtonVisibility() {
+  const rebuyConfirmBtn = document.getElementById("rebuyConfirmBtn");
+  if (rebuyPool.length === 0 && rebuyConfirmBtn) {
+    rebuyConfirmBtn.remove();
+  }
+}
  
-  
+function ensureRebuyConfirmBtn(rebuyPool) {
+  let rebuyConfirmBtn = document.getElementById("rebuyConfirmBtn");
+  if (!rebuyConfirmBtn && rebuyPool.length > 0) {
+    rebuyConfirmBtn = document.createElement("button");
+    rebuyConfirmBtn.id = "rebuyConfirmBtn";
+    rebuyConfirmBtn.textContent = "Confirm";
+    rebuyConfirmBtn.style.position = "fixed";
+    rebuyConfirmBtn.style.bottom = "75px";
+    rebuyConfirmBtn.style.right = "20px"; // left of cancel button
+    rebuyConfirmBtn.style.padding = "10px 15px";
+    rebuyConfirmBtn.style.backgroundColor = "green";
+    rebuyConfirmBtn.style.color = "white";
+    rebuyConfirmBtn.style.border = "none";
+    rebuyConfirmBtn.style.cursor = "pointer";
+    rebuyConfirmBtn.style.zIndex = 3001;
+
+    rebuyConfirmBtn.addEventListener("click", () => {
+      const rebuyAmount = parseInt(localStorage.getItem("Rebuy")) || 0;
+      rebuyPool.forEach(idx => {
+        players[idx].chips += rebuyAmount;
+      });
+
+      // Clean up UI
+      document.getElementById("rebuyOverlay")?.remove();
+      document.getElementById("rebuyCancelBtn")?.remove();
+      rebuyConfirmBtn.remove();
+      document.querySelectorAll(".player-select-btn").forEach(btn => btn.remove());
+
+      // Re-render chips
+      renderPlayers();
+    });
+
+    document.body.appendChild(rebuyConfirmBtn);
+  }
+}
 
 // Initialize
 renderPlayers();
@@ -463,6 +595,10 @@ if(gameMode == "Desktop") {
 // After renderPlayers() call and winnerBtn declaration
 const winnerBtn = document.getElementById("winnerBtn");
 let prizePool = []; // stores selected winners' indices or names
+
+// Rebuy button listener
+const rebuyBtn = document.getElementById("rebuyBtn"); // your Rebuy button in HTML
+let rebuyPool = [];
 
 winnerBtn.addEventListener("click", () => {
     // Create overlay
@@ -492,7 +628,7 @@ winnerBtn.addEventListener("click", () => {
     cancelBtn.style.zIndex = 3000;
     document.body.appendChild(cancelBtn);
 
-    showPlayerSelectionButtons();
+    showPlayerWinnerSelectionButtons();
   
     cancelBtn.addEventListener("click", () => {
       // Remove overlay and cancel button
@@ -501,50 +637,47 @@ winnerBtn.addEventListener("click", () => {
       document.querySelectorAll(".player-select-btn").forEach(btn => btn.remove());
 
     });
-  });
-
-confirmBtn.addEventListener("click", () => {
-    if (prizePool.length === 0) return;
-
-    // 1. Distribute pot among selected winners
-    const share = Math.floor(potAmount / prizePool.length);
-    let remainder = potAmount % prizePool.length;
-
-    prizePool.forEach(idx => {
-    players[idx].chips += share;
-    if (remainder > 0) {
-        players[idx].chips += 1;
-        remainder--;
-    }
-    });
-
-    // 2. Reset pot numerically and visually
-    potAmount = 0;
-    updatePotDisplay();
-
-    // 3. Remove all draggable chips from board
-    clearDraggables();
-
-    // 4. Reset all fold statuses and enable fold buttons & chips
-    players.forEach((p, idx) => {
-    p.folded = false;
-    const area = document.querySelectorAll(".player-area")[idx];
-    if (area) {
-        area.querySelectorAll(".fold-btn").forEach(btn => btn.disabled = false);
-        area.querySelectorAll(".draggable").forEach(chip => chip.dataset.disabled = "false");
-    }
-    });
-
-    // 5. Remove overlay, cancel button, confirm button, and player selection buttons
-    document.getElementById("overlay")?.remove();
-    document.getElementById("cancelBtn")?.remove();
-    confirmBtn.remove();
-    document.querySelectorAll(".player-select-btn").forEach(btn => btn.remove());
-
-    // 6. Render new chips for all players based on updated balances
-    renderPlayers();
-
-    // 7. Clear prize pool
-    prizePool = [];
 });
+
+rebuyBtn.addEventListener("click", () => {
+    // Create overlay
+    let overlay = document.createElement("div");
+    overlay.id = "rebuyOverlay";
+    overlay.style.position = "fixed";
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+    overlay.style.backgroundColor = "rgba(128,128,128,0.7)";
+    overlay.style.zIndex = 2000;
+    document.body.appendChild(overlay);
   
+    // Create cancel button
+    let rebuyCancelBtn = document.createElement("button");
+    rebuyCancelBtn.id = "rebuyCancelBtn";
+    rebuyCancelBtn.textContent = "Cancel";
+    rebuyCancelBtn.style.position = "absolute";
+    rebuyCancelBtn.style.bottom = "75px";
+    rebuyCancelBtn.style.right = "20px";
+    rebuyCancelBtn.style.padding = "10px 15px";
+    rebuyCancelBtn.style.backgroundColor = "red";
+    rebuyCancelBtn.style.color = "white";
+    rebuyCancelBtn.style.border = "none";
+    rebuyCancelBtn.style.cursor = "pointer";
+    rebuyCancelBtn.style.zIndex = 3000;
+    document.body.appendChild(rebuyCancelBtn);
+
+    showPlayerRebuySelectionButtons();
+  
+    rebuyCancelBtn.addEventListener("click", () => {
+      // Remove overlay and cancel button
+      overlay.remove();
+      rebuyCancelBtn.remove();
+      document.querySelectorAll(".player-select-btn").forEach(btn => btn.remove());
+
+    });
+});
+
+
+
+

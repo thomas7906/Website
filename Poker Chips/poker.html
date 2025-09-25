@@ -48,7 +48,7 @@
     }
     
     #error {
-      color: red;
+      color: rgb(110, 0, 0);
       margin-top: 10px;
     }
     
@@ -76,7 +76,11 @@
       <button id="removePlayer">-</button>
     </div>
 
-    <input type="number" id="chips" placeholder="Chips" min="1" max="10000">
+    <div id="chip-stuff">
+      <input type="number" id="chips" placeholder="Starting Chips" min="1" max="10000" style="width: 100px;">
+      <input type="number" id="rebuy" placeholder="Rebuy" min="1" max="10000">
+    </div>
+    <br>
     <button id="playBtn" style="background: green; color: white;">Play</button>
 
     <div id="error"></div>
@@ -92,6 +96,7 @@
     const chipsInput = document.getElementById("chips");
     const errorDiv = document.getElementById("error");
     const modeBtn = document.getElementById("modeBtn");
+    const rebuyInput = document.getElementById("rebuy");
   
     let gameMode = "Desktop"; // default mode
   
@@ -128,13 +133,20 @@
   
       const chips = parseInt(chipsInput.value);
       if (!chips || chips < 1 || chips > 10000) {
-        errorDiv.textContent = "Please enter a starting chip balance from 1-10000.";
+        errorDiv.textContent = "Please enter a starting chip balance from 1-10,000.";
+        return;
+      }
+
+      const rebuy = parseInt(rebuyInput.value);
+      if (!rebuy || rebuy < 1 || rebuy > 10000) {
+        errorDiv.textContent = "Please set a rebuy from 1-10,000.";
         return;
       }
   
       // Save players and starting chips in localStorage
       const playersData = validPlayers.map(name => ({ name, chips }));
       localStorage.setItem("startingChips", chips);
+      localStorage.setItem("Rebuy", rebuy);
       localStorage.setItem("players", JSON.stringify(playersData));
 
       // ✅ Save mode here
